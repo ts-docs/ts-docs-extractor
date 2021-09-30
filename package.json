@@ -1,0 +1,31 @@
+{
+  "name": "ts-docs-extractor",
+  "version": "0.0.1",
+  "description": "A wrapper around ts-extractor, which is able to link external types to other ts-docs generated documentation sites, with just a single link",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ts-docs/ts-docs-extractor.git"
+  },
+  "keywords": [
+    "extractor",
+    "ts-docs",
+    "typescript",
+    "AST"
+  ],
+  "author": "GoogleFeud",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ts-docs/ts-docs-extractor/issues"
+  },
+  "homepage": "https://github.com/ts-docs/ts-docs-extractor#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "eslint": "^7.32.0",
+    "typescript": "^4.4.3"
+  }
+}
