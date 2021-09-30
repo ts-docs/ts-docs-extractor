@@ -1,5 +1,5 @@
 {
-  "name": "ts-docs-extractor",
+  "name": "@ts-docs/ts-docs-extractor",
   "version": "0.0.1",
   "description": "A wrapper around ts-extractor, which is able to link external types to other ts-docs generated documentation sites, with just a single link",
   "main": "dist/index.js",
@@ -29,7 +29,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "@ts-docs/extractor": "^2.0.20",
+    "@ts-docs/extractor": "^2.0.21",
     "got": "^11.8.2"
   }
 }
