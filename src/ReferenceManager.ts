@@ -89,15 +89,15 @@ export class TsDocsReferenceManager extends ReferenceManager {
             const classVal = mod.classes.get(name);
             if (classVal) return { name, link: `${linkedMod.link}/${classVal}/class/${name}.html`, kind: TypeReferenceKinds.CLASS };
             const interVal = mod.interfaces.get(name);
-            if (interVal) return { name, link: path.join(linkedMod.link, interVal), kind: TypeReferenceKinds.INTERFACE };
+            if (interVal) return { name, link: `${linkedMod.link}/${interVal}/interface/${name}.html`, kind: TypeReferenceKinds.INTERFACE };
             const enumVal = mod.enums.get(name);
-            if (enumVal) return { name, link: path.join(linkedMod.link, enumVal.path), kind: TypeReferenceKinds.ENUM };
+            if (enumVal) return { name, link: `${linkedMod.link}/${enumVal}/enum/${name}.html`, kind: TypeReferenceKinds.ENUM };
             const typeVal = mod.types.get(name);
-            if (typeVal) return { name, link: path.join(linkedMod.link, typeVal), kind: TypeReferenceKinds.TYPE_ALIAS };
+            if (typeVal) return { name, link: `${linkedMod.link}/${typeVal}/type/${name}.html`, kind: TypeReferenceKinds.TYPE_ALIAS };
             const constVal = mod.constants.get(name);
-            if (constVal) return { name, link: path.join(linkedMod.link, constVal), kind: TypeReferenceKinds.CONSTANT };
+            if (constVal) return { name, link: `${linkedMod.link}/${constVal}/constant/${name}.html`, kind: TypeReferenceKinds.CONSTANT };
             const funVal = mod.functions.get(name);
-            if (funVal) return { name, link: path.join(linkedMod.link, funVal), kind: TypeReferenceKinds.FUNCTION };
+            if (funVal) return { name, link: `${linkedMod.link}/${funVal}/function/${name}.html`, kind: TypeReferenceKinds.FUNCTION };
         }
         return;
     }
