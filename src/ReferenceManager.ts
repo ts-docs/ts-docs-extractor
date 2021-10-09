@@ -47,13 +47,39 @@ export class TsDocsReferenceManager extends ReferenceManager {
         this.linkedCache = new Map();
     }
 
-    findExternal(sym: ts.Symbol, source?: string) : ReferenceType|undefined {
-        if (!source) return this.findUnnamedExternal(sym);
-        const name = sym.name;
-        const firstSlash = source.indexOf("/");
-        const modName = firstSlash === -1 ? source : source.slice(0, firstSlash);
-        if (this.linked.has(modName)) return this.findLinkedExternal(name, modName);
-        return super.findExternal(sym, source);
+    findExternal(symbol: ts.Symbol, source?: string) : ReferenceType|undefined {
+        if (this.has(symbol)) return this.get(symbol);
+        let name = symbol.name;
+        if (!source && symbol.declarations && symbol.declarations.length && !symbol.declarations[0].getSourceFile().isDeclarationFile) {
+            const decl = symbol.declarations[0];
+            if (ts.isImportClause(decl)) source = (decl.parent.moduleSpecifier as ts.StringLiteral).text;
+            else if (ts.isImportSpecifier(decl)) {
+                source = (decl.parent.parent.parent.moduleSpecifier as ts.StringLiteral).text;
+                if (decl.propertyName) name = decl.propertyName.text;
+            }
+        }
+        if (source) {
+            const path = source.split("/");
+            const first = path.shift();
+            if (first) {
+                if (this.linked.has(first)) {
+                    const linked = this.findLinkedExternal(name, first);
+                    if (linked) {
+                        this.set(symbol, linked);
+                        return linked;
+                    }
+                }
+                if (this.namedExternals.has(first)) {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    const res = { name, kind: TypeReferenceKinds.EXTERNAL, ...this.namedExternals.get(first)!.run(name, source) };
+                    this.set(symbol, res);
+                    return res;
+                }
+            }
+        }
+        const unnamed = this.findUnnamedExternal(name, source);
+        if (unnamed) this.set(symbol, unnamed);
+        return unnamed;
     }
 
     findLinkedExternal(name: string, modName: string) : ReferenceType|undefined {
@@ -61,7 +87,7 @@ export class TsDocsReferenceManager extends ReferenceManager {
         const linkedMod = this.linked.get(modName)!;
         for (const mod of linkedMod.modules) {
             const classVal = mod.classes.get(name);
-            if (classVal) return { name, link: path.join(linkedMod.link, classVal), kind: TypeReferenceKinds.CLASS };
+            if (classVal) return { name, link: `${linkedMod.link}/${classVal}/class/${name}.html`, kind: TypeReferenceKinds.CLASS };
             const interVal = mod.interfaces.get(name);
             if (interVal) return { name, link: path.join(linkedMod.link, interVal), kind: TypeReferenceKinds.INTERFACE };
             const enumVal = mod.enums.get(name);
@@ -83,15 +109,15 @@ export class TsDocsReferenceManager extends ReferenceManager {
                 const [modules, moduleNames] = await fetch(path.join(lib.link, "assets/search.json")).json() as PackedSearchData;
                 for (const module of modules) {
                     linkedMods.push({
-                        classes: new Map(module[1].map(([name, _props, _methods, numPath]) => [name, numPath.map(num => moduleNames[num]).join("/")])),
-                        interfaces: new Map(module[2].map(([name, _props, numPath]) => [name, numPath.map(num => moduleNames[num]).join("/")])),
+                        classes: new Map(module[1].map(([name, _props, _methods, numPath]) => [name, numPath.map(num => `m.${moduleNames[num]}`).join("/")])),
+                        interfaces: new Map(module[2].map(([name, _props, numPath]) => [name, numPath.map(num => `m.${moduleNames[num]}`).join("/")])),
                         enums: new Map(module[3].map(([name, members, numPath]) => [name, {
-                            path: numPath.map(num => moduleNames[num]).join("/"),
+                            path: numPath.map(num => `m.${moduleNames[num]}`).join("/"),
                             members: new Set(...members)
                         }])),
-                        types: new Map(module[4].map(([name, numPath]) => [name, numPath.map(num => moduleNames[num]).join("/")])),
-                        functions: new Map(module[5].map(([name, numPath]) => [name, numPath.map(num => moduleNames[num]).join("/")])),
-                        constants: new Map(module[6].map(([name, numPath]) => [name, numPath.map(num => moduleNames[num]).join("/")]))
+                        types: new Map(module[4].map(([name, numPath]) => [name, numPath.map(num => `m.${moduleNames[num]}`).join("/")])),
+                        functions: new Map(module[5].map(([name, numPath]) => [name, numPath.map(num => `m.${moduleNames[num]}`).join("/")])),
+                        constants: new Map(module[6].map(([name, numPath]) => [name, numPath.map(num => `m.${moduleNames[num]}`).join("/")]))
                     });
                 }
                 this.linked.set(lib.name, { modules: linkedMods, link: lib.link});
